@@ -2,18 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Plant Disease Detection</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-        input[type=file] { margin: 20px 0; }
-        button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Disease Detector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Plant Disease Detection</h1>
-    <form action="/predict" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" accept="image/*" required><br>
-        <button type="submit">Predict Disease</button>
-    </form>
+    <div class="container">
+        <h1>🌿 Plant Disease Detector</h1>
+        <p>Upload a leaf image and get instant diagnosis!</p>
+        
+        <form action="/predict" method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" accept="image/*" required>
+            <button type="submit">Predict Disease</button>
+        </form>
+        
+        <footer>
+            <p>Supported Crops: Potato, Tomato, Corn, Rice</p>
+        </footer>
+    </div>
 </body>
 </html>
