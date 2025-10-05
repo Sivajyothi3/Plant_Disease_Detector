@@ -1,18 +1,16 @@
-from flask import Flask, render_template, request
+import gradio as gr
 import numpy as np
-import os
+from PIL import Image
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.models import load_model
 
-app = Flask(__name__)
-
-# Load your trained CNN model ONCE at startup
+# Load trained CNN model
 MODEL_PATH = "plant_disease_cnn_model.h5"
 print("Loading model, please wait...")
 model = load_model(MODEL_PATH)
 print("Model loaded successfully!")
 
-# Define class names (must match model output order)
+# Class names
 class_names = [
     "Potato___Early_blight",
     "Potato___Late_blight",
@@ -29,9 +27,9 @@ class_names = [
     "Rice___healthy"
 ]
 
-# Disease information dictionary
+# Disease information
 disease_info = {
-    # POTATO
+    # Potato
     "Potato___healthy": {
         "leaf_type": "Potato Leaf",
         "disease": "Healthy",
@@ -53,12 +51,11 @@ disease_info = {
         "suggestions": "Use copper-based fungicides and ensure proper spacing for air circulation.",
         "link": "https://plantvillage.psu.edu/topics/potato/infos"
     },
-
-    # TOMATO
+    # Tomato
     "Tomato___healthy": {
         "leaf_type": "Tomato Leaf",
         "disease": "Healthy",
-        "description": "No disease detected. The tomato plant is in healthy condition.",
+        "description": "No disease detected. The tomato plant is healthy.",
         "suggestions": "Continue regular care and avoid overwatering.",
         "link": "https://plantvillage.psu.edu/topics/tomato/infos"
     },
@@ -83,8 +80,7 @@ disease_info = {
         "suggestions": "Improve air circulation, reduce humidity, and apply fungicides.",
         "link": "https://plantvillage.psu.edu/topics/tomato/infos"
     },
-
-    # CORN
+    # Corn
     "Corn___healthy": {
         "leaf_type": "Maize Leaf",
         "disease": "Healthy",
@@ -106,8 +102,7 @@ disease_info = {
         "suggestions": "Rotate crops and apply fungicides like mancozeb or carbendazim.",
         "link": "https://plantvillage.psu.edu/topics/maize/infos"
     },
-
-    # RICE
+    # Rice
     "Rice___healthy": {
         "leaf_type": "Rice Leaf",
         "disease": "Healthy",
@@ -131,69 +126,44 @@ disease_info = {
     }
 }
 
-# Home route
-@app.route('/')
-def home():
-    return render_template('index.html')
+THRESHOLD = 80.0  # minimum confidence for valid prediction
 
-# Predict route
-@app.route('/predict', methods=['POST'])
-def predict():
-    if 'file' not in request.files:
-        return render_template('result.html', error="No file uploaded.")
-    file = request.files['file']
-    if file.filename == '':
-        return render_template('result.html', error="No file selected.")
-
-    # Save uploaded file
-    file_path = os.path.join('static', file.filename)
-    file.save(file_path)
-
-    # Preprocess image efficiently
-    img = image.load_img(file_path, target_size=(128, 128))
-    img_array = image.img_to_array(img) / 255.0
+def predict_leaf(img: Image.Image):
+    img_array = image.img_to_array(img.resize((128, 128))) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
 
-    # Make prediction
     predictions = model.predict(img_array)
-    predicted_index = np.argmax(predictions, axis=1)[0]
-    confidence = round(100 * np.max(predictions), 2)
+    predicted_index = np.argmax(predictions)
+    confidence = 100 * np.max(predictions)
 
-    # Threshold for unknown leaf detection
-    THRESHOLD = 60.0  # confidence < 60% considered unknown
-    if confidence < THRESHOLD or predicted_index >= len(class_names):
-        return render_template(
-            'result.html',
-            prediction="Unknown Leaf",
-            confidence=confidence,
-            info={
-                "leaf_type": "Unknown",
-                "disease": "Unknown",
-                "description": "This leaf may not belong to the supported crops (Potato, Tomato, Corn, Rice).",
-                "suggestions": "Please use a leaf from supported crops for reliable prediction.",
-                "link": "#"
-            },
-            image_path=file_path
-        )
+    if confidence < THRESHOLD:
+        return f"""
+        <h3>⚠️ Unsupported Leaf</h3>
+        <p>Confidence: {confidence:.2f}%</p>
+        <p>Only Potato, Tomato, Corn, and Rice leaves are supported.</p>
+        """, img
 
-    # Valid prediction
     predicted_class = class_names[predicted_index]
-    info = disease_info.get(predicted_class, {
-        "leaf_type": "Unknown",
-        "disease": predicted_class,
-        "description": "No details available for this disease.",
-        "suggestions": "Please consult an agricultural expert.",
-        "link": "#"
-    })
+    info = disease_info[predicted_class]
 
-    return render_template(
-        'result.html',
-        prediction=predicted_class,
-        confidence=confidence,
-        info=info,
-        image_path=file_path
-    )
+    return f"""
+    <h3>Prediction: {predicted_class}</h3>
+    <p><b>Confidence:</b> {confidence:.2f}%</p>
+    <p><b>Leaf Type:</b> {info['leaf_type']}</p>
+    <p><b>Disease:</b> {info['disease']}</p>
+    <p><b>Description:</b> {info['description']}</p>
+    <p><b>Suggestions:</b> {info['suggestions']}</p>
+    <p><b>More Info:</b> <a href="{info['link']}" target="_blank">Click Here</a></p>
+    """, img
 
-if __name__ == '__main__':
-    # Run with lower debug/memory options for Render free plan
-    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
+# Gradio Interface
+ui = gr.Interface(
+    fn=predict_leaf,
+    inputs=gr.Image(type="pil", label="Upload Leaf Image"),
+    outputs=[gr.HTML(label="Prediction Details"), gr.Image(label="Uploaded Leaf")],
+    title="Plant Disease Detector",
+    description="Upload a leaf image from Potato, Tomato, Corn, or Rice to detect its disease.",
+    allow_flagging="never"
+)
+
+ui.launch()

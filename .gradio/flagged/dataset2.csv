@@ -1,0 +1,10 @@
+Upload Leaf Image,Result,timestamp
+.gradio\flagged\Upload Leaf Image\b64b8964d4f23a58b5ba\1defd277-6394-4049-895d-470f1e27e189___RS_Early.B 8931.jpg,"'
+    <h2>Prediction: Healthy</h2>
+    <p><b>Confidence:</b> 99.98999786376953%</p>
+    <p><b>Leaf Type:</b> Tomato Leaf</p>
+    <p><b>Disease:</b> Healthy</p>
+    <p><b>Description:</b> No disease detected. The tomato plant is in healthy condition.</p>
+    <p><b>Suggestions:</b> Continue regular care and avoid overwatering.</p>
+    <p><b>More Info:</b> <a href=""https://plantvillage.psu.edu/topics/tomato/infos"" target=""_blank"">Click here</a></p>
+    ",2025-10-05 12:07:14.598930
