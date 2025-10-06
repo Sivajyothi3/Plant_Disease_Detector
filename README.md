@@ -25,6 +25,10 @@ This project helps farmers and researchers identify plant diseases quickly by up
 Download the dataset from Kaggle:  
 🔗 [Plant Disease Detection Dataset](https://www.kaggle.com/sumanismcse/plant-disease-detection-using-keras)
 
+Extract it inside your project folder.
+
+Use it for training or retraining your CNN model.
+
 > The dataset contains ~14,000 images of healthy and diseased leaves across multiple plant species.
 
 ---
