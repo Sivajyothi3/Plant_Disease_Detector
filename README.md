@@ -81,11 +81,24 @@ Upload a leaf image and get instant predictions!
 
 ## 🧩 Technologies Used
 
-- **Python**
-- **TensorFlow / Keras**
-- **Gradio**
-- **NumPy, Pandas, Matplotlib**
-- **Hugging Face Spaces** for deployment
+Python
+
+TensorFlow / Keras
+
+Gradio – for web UI
+
+NumPy, OpenCV, Pillow – for image preprocessing
+
+Hugging Face Spaces – for model deployment
+
+---
+
+🪄 Working of the Project
+
+1️⃣ Image Upload: User uploads a leaf image via Gradio.
+2️⃣ Preprocessing: The image is resized and normalized.
+3️⃣ Prediction: The CNN model classifies the image into disease categories.
+4️⃣ Result Display: The predicted disease name is displayed to the user.
 
 ---
 
